@@ -8,7 +8,7 @@ type TargetMenuProperties = {
 	onTargetChange: (value: number) => () => void;
 	currentValue: number;
 	maxValue: number;
-  label: string;
+	label: string;
 	theme: Theme;
 };
 
@@ -25,9 +25,27 @@ const TargetMenu = ({
 		handleTargetChange(Math.max(1, Math.min(maxValue, value)))();
 	};
 
+	const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
+		const value = Number.parseInt(event.target.value, 10);
+
+		if (Number.isNaN(value)) {
+			return;
+		}
+
+		handleTargetChange(Math.max(1, Math.min(maxValue, value)))();
+	};
+
 	return (
-		<div className="fixed flex items-center justify-center inset-0 w-full h-full bg-neutral-100 dark:bg-neutral-900 bg-opacity-80 backdrop-blur-md z-50">
-			<div className="mx-auto w-full max-w-sm">
+		<div className="fixed flex flex-col items-center justify-center inset-0 w-full h-full bg-neutral-100 dark:bg-neutral-900 bg-opacity-80 backdrop-blur-md z-50">
+			<div className="mt-5 flex flex-col">
+				<div>
+					<select value={"p"} onChange={handleSelectChange}>
+						<option value="s">Streak</option>
+						<option value="p">Precision</option>
+					</select>
+				</div>
+			</div>
+			<div className="mt-5 flex flex-col">
 				<h2 className="text-neutral-900 dark:text-neutral-100 uppercase text-4xl font-bold">{title}</h2>
 				<div className="mt-6 flex flex-col">
 					<p className="text-neutral-900 dark:text-neutral-100 uppercase text-xs">Presets</p>
@@ -44,7 +62,7 @@ const TargetMenu = ({
 						))}
 					</div>
 				</div>
-				<div className="mt-8 flex flex-col">
+				<div className="mt-8 flex flex-col flex flex-col">
 					<p className="text-neutral-900 dark:text-neutral-100 uppercase text-xs">{`Custom value (1-${maxValue})`}</p>
 					<input
 						className="mt-4 w-full px-4 py-4 text-neutral-900 dark:text-neutral-200 bg-neutral-100 dark:bg-neutral-900 border-2 border-neutral-400 dark:border-neutral-700 rounded-md"
@@ -55,6 +73,8 @@ const TargetMenu = ({
 						onChange={handleManualTargetChange}
 					/>
 				</div>
+			</div>
+			<div className="mt-5 flex flex-col">
 				<div className="mt-4 flex flex-col">
 					<button className="w-full px-4 py-2 text-neutral-900 dark:text-neutral-200 bg-neutral-300 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 border-2 border-neutral-400 dark:border-neutral-700 rounded-md" type="button" onClick={handleOnClose}>Close</button>
 				</div>

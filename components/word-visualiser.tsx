@@ -2,7 +2,9 @@ import {useCallback, useMemo} from 'react';
 import {useAppState, type Character, type State} from '@app/config/state';
 
 const characterClasses = (state: State, character: Character): string => {
-	if (state.word.streak === state.targetStreak) {
+	if (state.streakMode && (state.word.streak === state.targetStreak) ||
+	    ((!state.streakMode) && (state.word.progress >= 100))
+	   ) {
 		return 'text-green-600 dark:text-green-500';
 	}
 
@@ -34,15 +36,55 @@ const statusIndicatorAnimationClasses = (state: State): string => {
 };
 
 const streakIndicatorClasses = (state: State, index: number): string => {
-	if (index < state.word.streak) {
-		return 'bg-green-600 dark:bg-green-600';
+	if (state.streakMode) {
+		if (index < state.word.streak) {
+			return 'bg-green-600 dark:bg-green-600';
+		}
+		if (index === state.word.streak) {
+			return 'bg-neutral-400 dark:bg-neutral-400';
+		}
+		return 'bg-neutral-300 dark:bg-neutral-700';
 	}
-
-	if (index === state.word.streak) {
-		return 'bg-neutral-400 dark:bg-neutral-400';
+	if (index < 0) {
+		return 'bg-neutral-300 dark:bg-neutral-700';
 	}
-
-	return 'bg-neutral-300 dark:bg-neutral-700';
+	if (state.word.progress >= 0) {
+		if (index < state.word.progress / 5) {
+			if (index < state.word.prevprog / 5) {
+				return 'bg-green-800 dark:bg-green-800';
+			}
+			else {
+				return 'bg-green-600 dark:bg-green-600';
+			}
+		}
+		else {
+			if (index < state.word.prevprog / 5) {
+				return 'bg-neutral-600 dark:bg-neutral-600';
+			}
+			else {
+				return 'bg-neutral-400 dark:bg-neutral-400';
+			}
+		}
+	}
+	else {
+		// negative progress
+		if (index < -state.word.progress / 5) {
+			if (index >= -state.word.prevprog / 5) {
+				return 'bg-red-600 dark:bg-red-600';
+			}
+			else {
+				return 'bg-red-800 dark:bg-red-800';
+			}
+		}
+		else {
+			if (index >= -state.word.prevprog / 5) {
+				return 'bg-neutral-400 dark:bg-neutral-400';
+			}
+			else {
+				return 'bg-neutral-600 dark:bg-neutral-600';
+			}
+		}
+	}
 };
 
 const WordVisualiser = (): React.ReactElement | undefined => {
@@ -101,7 +143,7 @@ const WordVisualiser = (): React.ReactElement | undefined => {
 				))}
 			</p>
 			<div className="flex flex-wrap gap-1 justify-center mt-6 -skew-y-12 rotate-12">
-				{Array.from({length: state.targetStreak}).map((_, index) => (
+				{Array.from({length: state.streakMode ? state.targetStreak : 20}).map((_, index) => (
 					// eslint-disable-next-line react/no-array-index-key
 					<div key={index} className={`w-4 h-4 ${streakIndicatorClasses(state, index)}`}/>
 				))}

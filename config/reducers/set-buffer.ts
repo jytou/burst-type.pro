@@ -15,7 +15,8 @@ const setBuffer = (state: State, action: SetBufferAction): State => {
 		return state;
 	}
 
-	if (state.word.streak >= state.targetStreak) {
+	if ((state.streakMode && (state.word.streak >= state.targetStreak)) ||
+	    ((!state.streakMode) && (state.word.progress >= 100))) {
 		return state;
 	}
 
@@ -44,6 +45,8 @@ const setBuffer = (state: State, action: SetBufferAction): State => {
 				wpm: 0,
 				match: false,
 				hitTargetWPM: false,
+				prevprog: state.word.progress,
+				progress: state.word.progress > 0 ? 0 : action.payload.length == 1 ? state.word.progress : Math.max(-100, state.word.progress - 10),
 			},
 			typoText: action.payload,
 			buffer: '',
@@ -53,8 +56,15 @@ const setBuffer = (state: State, action: SetBufferAction): State => {
 
 	if (state.word.endTime === undefined && action.payload.length >= state.word.characters.length) {
 		const streak = hitTargetWPM ? state.word.streak + 1 : 0;
+		const prevprog = state.word.progress;
+		const addedProgress = Math.round(wpm >= state.targetWPM ? Math.sqrt(144.0 * wpm / state.targetWPM) - 2 : (wpm - state.targetWPM) / 2);
+		const progress = state.word.progress < 0 ?
+		                      Math.max(-100, state.word.progress + (addedProgress >= 0 ? addedProgress * 2 : 5)) :
+							  Math.max(0, state.word.progress + addedProgress);
 
-		if (streak >= state.targetStreak) {
+		if ((state.streakMode && (streak >= state.targetStreak)) ||
+		    ((!state.streakMode) && (progress >= 100))
+		   ) {
 			// eslint-disable-next-line max-depth
 			if (state.level + 1 === (state.customWordlist ?? en1000).length) {
 				return {
@@ -97,6 +107,8 @@ const setBuffer = (state: State, action: SetBufferAction): State => {
 				wpm,
 				match,
 				hitTargetWPM,
+				prevprog,
+				progress,
 			},
 			lastWPM: wpm,
 			capsDetected,
@@ -126,7 +138,8 @@ const setBuffer = (state: State, action: SetBufferAction): State => {
 	const nextBuffer = action.payload;
 	const repeatWord = createWord(state.customWordlist ?? en1000, state.level);
 
-	if (state.word.streak < state.targetStreak) {
+	if ((state.streakMode && (state.word.streak < state.targetStreak)) ||
+	    ((!state.streakMode) && (state.word.progress < 100))) {
 		return {
 			...state,
 			...captureEvent('type'),
@@ -141,6 +154,8 @@ const setBuffer = (state: State, action: SetBufferAction): State => {
 						: character.character === nextBuffer[index],
 				})),
 				streak: state.word.streak,
+				prevprog: state.word.prevprog,
+				progress: state.word.progress,
 			},
 			buffer: nextBuffer,
 			capsDetected,

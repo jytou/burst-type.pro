@@ -31,6 +31,8 @@ type Word = {
 	hitTargetWPM: boolean;
 	match: boolean;
 	streak: number;
+	progress: number;
+	prevprog: number;
 };
 
 type State = {
@@ -42,6 +44,7 @@ type State = {
 	buffer: string;
 	targetWPM: number;
 	targetStreak: number;
+	streakMode: boolean;
 	finished: boolean;
 	lastSave?: number;
 	showInstructions: boolean;
@@ -95,11 +98,14 @@ const createWord = (list: string[], index: number): Word => ({
 	match: false,
 	hitTargetWPM: false,
 	streak: 0,
+	progress: 25,
+	prevprog: 25,
 });
 
 const defaultLevel = 0;
 const defaultTargetWPM = 90;
 const defaultTargetStreak = 5;
+const defaultStreakMode = false;
 
 const wpmOptions = [30, 60, 90, 120, 200];
 const streakOptions = [1, 3, 5, 10, 25];
@@ -112,6 +118,7 @@ const initialState: State = {
 	buffer: '',
 	targetWPM: defaultTargetWPM,
 	targetStreak: defaultTargetStreak,
+	streakMode: defaultStreakMode,
 	finished: false,
 	showInstructions: true,
 	showCredits: false,

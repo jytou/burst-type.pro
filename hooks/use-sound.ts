@@ -61,7 +61,12 @@ const useSound = (): void => {
 				break;
 			}
 			case 'wordComplete': {
-				playSound(randomElement(state.sounds.wordComplete), 100 + 100 * (state.word.streak / state.targetStreak));
+				playSound(randomElement(state.sounds.wordComplete), 100 + 
+				    (state.streakMode ?
+					  100 * (state.word.streak / state.targetStreak) :
+				      Math.round(3 * state.word.progress)
+					)
+				);
 				break;
 			}
 			case 'streakComplete': {
